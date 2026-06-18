@@ -536,10 +536,10 @@ let NAV = { stack:[], sys:null, catId:null, inspId:null, adminSys:null, adminCat
 
 // ─── NAVIGATION ──────────────────────────────────────────────────────────────
 const SYS_INFO = {
-  ELE: {name:'Hệ thống điện', icon:'⚡', color:'#185FA5'},
-  HVAC:{name:'Hệ thống HVAC / cơ khí', icon:'💨', color:'#0F6E56'},
-  PCCC:{name:'Hệ thống PCCC', icon:'🔥', color:'#A32D2D'},
-  PS:  {name:'Hệ thống cấp thoát nước', icon:'💧', color:'#854F0B'}
+  ELE: {name:'An toàn thi công', icon:'⛑️', color:'#185FA5'},
+  HVAC:{name:'Thiết bị có yêu cầu nghiêm ngặt', icon:'⚙️', color:'#0F6E56'},
+  PCCC:{name:'An toàn điện trong thi công', icon:'⚡', color:'#A32D2D'},
+  PS:  {name:'An toàn thực phẩm', icon:'🥗', color:'#854F0B'}
 };
 
 function showPage(id, title, sub, actions){
@@ -1070,6 +1070,12 @@ renderHome();
 </script>
 
 <script>
+// Xóa cache khi update version
+var APP_VERSION = '2.2';
+if(localStorage.getItem('mep_version') !== APP_VERSION){
+  localStorage.clear();
+  localStorage.setItem('mep_version', APP_VERSION);
+}
 // Service Worker registration
 if('serviceWorker' in navigator){
   var swBlob = new Blob([`const CACHE = 'mep-v1';
