@@ -331,6 +331,12 @@ input:focus,select:focus{outline:none;border-color:var(--blue)}
   <button class="btn-s" onclick="deleteCat()" style="color:var(--redmid);margin-top:4px">🗑️ Xóa hạng mục này</button>
 </div>
 
+
+<!-- LIGHTBOX -->
+<div class="lb" id="lb" onclick="lbClose()">
+  <button class="lb-close" onclick="lbClose()">&#10005;</button>
+  <img id="lb-img" src="" alt="anh kiem tra" style="max-width:94vw;max-height:85vh;border-radius:8px;object-fit:contain">
+</div>
 </div><!-- content -->
 </div><!-- app -->
 <div class="toast" id="toast"></div>
@@ -991,7 +997,7 @@ function renderCL(insp){
       html+='<button class="act-btn'+snCls+'" data-di="'+di+'" data-st="na" onclick="setStBtn(this)">N/A</button>';
       html+='<button class="act-btn" onclick="triggerPhoto('+di+')" style="padding:5px 10px">&#128247;</button>';
       html+='</div>';
-      html+='<input type="file" id="fi'+di+'" accept="image/*" capture="environment" style="display:none" onchange="onPhoto(event,'+di+')">';
+      html+='<input type="file" id="fi'+di+'" accept="image/*" style="display:none" onchange="onPhoto(event,'+di+')">';
       html+='<textarea placeholder="Ghi chu..." data-di="'+di+'" onchange="setNoteBtn(this)" style="min-height:48px">'+(it2.note||'')+'</textarea>';
       html+='<div class="photo-row" id="pr'+di+'"></div>';
       html+='</div>';
@@ -1052,17 +1058,100 @@ function onDP(e){
   saveDB(DB);_dSrc=null;renderCL(insp);
 }
 
+
+// ─── PHOTO ───────────────────────────────────────────────────────────────────
+function triggerPhoto(idx){
+  var inp = document.getElementById('fi'+idx);
+  if(inp){ inp.value=''; inp.click(); }
+}
+function onPhoto(e, idx){
+  var file = e.target.files[0];
+  if(!file) return;
+  // Check size - limit 2MB
+  if(file.size > 2*1024*1024){
+    alert('Anh qua lon! Vui long chon anh duoi 2MB');
+    return;
+  }
+  var reader = new FileReader();
+  reader.onload = function(ev){
+    var insp = DB.inspections.find(function(i){ return i.id===NAV.inspId; });
+    if(!insp) return;
+    if(!insp.items[idx].photos) insp.items[idx].photos = [];
+    insp.items[idx].photos.push(ev.target.result);
+    saveDB(DB);
+    renderPhotos(idx, insp);
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+}
+function renderPhotos(idx, insp){
+  var row = document.getElementById('pr'+idx);
+  if(!row) return;
+  var photos = insp.items[idx].photos || [];
+  var h = '';
+  for(var p=0; p<photos.length; p++){
+    h += '<div style="position:relative;display:inline-block;margin:2px">';
+    h += '<img src="'+photos[p]+'" class="photo-thumb" data-idx="'+idx+'" data-pi="'+p+'" onclick="lbOpen(this.dataset.idx, this.dataset.pi)" style="width:64px;height:64px;object-fit:cover;border-radius:6px;border:1px solid var(--bd);cursor:pointer">';
+    h += '<button data-idx="'+idx+'" data-pi="'+p+'" onclick="delPhoto(this.dataset.idx, this.dataset.pi)" style="position:absolute;top:-5px;right:-5px;background:var(--redmid);color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:10px;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center">x</button>';
+    h += '</div>';
+  }
+  row.innerHTML = h;
+}
+function delPhoto(idx, pi){
+  idx = parseInt(idx); pi = parseInt(pi);
+  var insp = DB.inspections.find(function(i){ return i.id===NAV.inspId; });
+  if(!insp || !insp.items[idx].photos) return;
+  insp.items[idx].photos.splice(pi, 1);
+  saveDB(DB);
+  renderPhotos(idx, insp);
+}
+function lbOpen(idx, pi){
+  idx = parseInt(idx); pi = parseInt(pi);
+  var insp = DB.inspections.find(function(i){ return i.id===NAV.inspId; });
+  if(!insp || !insp.items[idx].photos) return;
+  var src = insp.items[idx].photos[pi];
+  document.getElementById('lb-img').src = src;
+  document.getElementById('lb').className = 'lb on';
+}
+function lbClose(){
+  document.getElementById('lb').className = 'lb';
+}
+
 function setSt(idx,st){
-  const insp=DB.inspections.find(i=>i.id===NAV.inspId);
+  var insp=DB.inspections.find(function(i){return i.id===NAV.inspId;});
   insp.items[idx].st=st; saveDB(DB);
-  const ci=document.getElementById('ci'+idx);
-  ci.className='ci s-'+st;
-  const btns=ci.querySelectorAll('.act-btn');
-  btns.forEach(b=>b.className='act-btn');
-  if(st==='pass')btns[0].className='act-btn sp';
-  else if(st==='fail')btns[1].className='act-btn sf';
-  else btns[2].className='act-btn sn';
+  var ci=document.getElementById('ci'+idx);
+  if(ci){
+    ci.className='ci s-'+st;
+    var btns=ci.querySelectorAll('.act-btn');
+    for(var b=0;b<btns.length;b++) btns[b].className='act-btn';
+    if(st==='pass')btns[0].className='act-btn sp';
+    else if(st==='fail')btns[1].className='act-btn sf';
+    else if(st==='na')btns[2].className='act-btn sn';
+  }
   updateCLStats(insp);
+  // Update group header color
+  updateGrpHeaders(insp);
+}
+function updateGrpHeaders(insp){
+  var groups=[], grpMap={};
+  for(var i=0;i<insp.items.length;i++){
+    var gn=insp.items[i].g||'Muc kiem tra';
+    if(!grpMap[gn]){grpMap[gn]={idxs:[]};groups.push(grpMap[gn]);}
+    grpMap[gn].idxs.push(i);
+  }
+  for(var gi=0;gi<groups.length;gi++){
+    var hdr=document.querySelector('.grp-header[onclick="toggleGrp('+gi+')"]');
+    if(!hdr) continue;
+    var gPass=0;
+    for(var k=0;k<groups[gi].idxs.length;k++){
+      if(insp.items[groups[gi].idxs[k]].st==='pass') gPass++;
+    }
+    var allPass=(gPass===groups[gi].idxs.length&&groups[gi].idxs.length>0);
+    hdr.style.background=allPass?'var(--greenmid)':'#185FA5';
+    var stats=hdr.querySelector('.grp-stats');
+    if(stats) stats.textContent=gPass+'/'+groups[gi].idxs.length;
+  }
 }
 function setNote(idx,v){
   DB.inspections.find(i=>i.id===NAV.inspId).items[idx].note=v; saveDB(DB);
