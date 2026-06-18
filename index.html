@@ -1438,58 +1438,139 @@ renderHome();
 </script>
 
 <script>
-// Xóa cache khi update version
-var APP_VERSION = '4.1';
+// ─── VERSION & AUTO-UPDATE ───────────────────────────────────────────────────
+var APP_VERSION = '4.2';
+
+// Xóa localStorage cũ khi đổi version cấu trúc
 if(localStorage.getItem('mep_version') !== APP_VERSION){
+  var savedInsp = null;
+  try {
+    var old = localStorage.getItem('mep_app_v3') || localStorage.getItem('mep_v3');
+    if(old) savedInsp = JSON.parse(old).inspections;
+  } catch(e){}
   localStorage.clear();
   localStorage.setItem('mep_version', APP_VERSION);
-}
-// Service Worker registration
-if('serviceWorker' in navigator){
-  var swBlob = new Blob([`const CACHE = 'mep-v1';
-const ASSETS = ['/'];
-self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(cache => cache.addAll([])));
-  self.skipWaiting();
-});
-self.addEventListener('activate', e => {
-  e.waitUntil(caches.keys().then(keys =>
-    Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-  ));
-  self.clients.claim();
-});
-self.addEventListener('fetch', e => {
-  e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request).catch(() => cached))
-  );
-});`], {type:'text/javascript'});
-  var swUrl = URL.createObjectURL(swBlob);
-  navigator.serviceWorker.register(swUrl).then(function(reg){
-    console.log('SW registered');
-  }).catch(function(e){ console.log('SW error:', e); });
+  // Giữ lại phiếu kiểm tra cũ
+  if(savedInsp && savedInsp.length > 0){
+    localStorage.setItem('mep_app_v3', JSON.stringify({
+      cats: {}, inspections: savedInsp
+    }));
+  }
 }
 
-// PWA Install banner
+// ─── SERVICE WORKER: Network-first, tự cập nhật ──────────────────────────────
+if('serviceWorker' in navigator){
+  // Tạo SW với cache version = APP_VERSION để force update khi deploy mới
+  var swCode = [
+    "var CACHE_NAME = 'mep-cache-" + APP_VERSION + "';",
+    "self.addEventListener('install', function(e){",
+    "  self.skipWaiting();",
+    "});",
+    "self.addEventListener('activate', function(e){",
+    "  e.waitUntil(",
+    "    caches.keys().then(function(keys){",
+    "      return Promise.all(keys.filter(function(k){ return k !== CACHE_NAME; }).map(function(k){ return caches.delete(k); }));",
+    "    })",
+    "  );",
+    "  self.clients.claim();",
+    "});",
+    "self.addEventListener('fetch', function(e){",
+    "  if(e.request.method !== 'GET') return;",
+    "  e.respondWith(",
+    "    fetch(e.request).then(function(res){",
+    "      if(res && res.status === 200){",
+    "        var resClone = res.clone();",
+    "        caches.open(CACHE_NAME).then(function(cache){ cache.put(e.request, resClone); });",
+    "      }",
+    "      return res;",
+    "    }).catch(function(){",
+    "      return caches.match(e.request);",
+    "    })",
+    "  );",
+    "});",
+    // Nhận message reload từ trang
+    "self.addEventListener('message', function(e){",
+    "  if(e.data === 'SKIP_WAITING') self.skipWaiting();",
+    "});"
+  ].join('\n');
+
+  var swBlob = new Blob([swCode], {type: 'text/javascript'});
+  var swUrl = URL.createObjectURL(swBlob);
+
+  navigator.serviceWorker.register(swUrl).then(function(reg){
+    // Kiểm tra update mỗi khi trang load
+    reg.update();
+
+    reg.addEventListener('updatefound', function(){
+      var newSW = reg.installing;
+      if(!newSW) return;
+      newSW.addEventListener('statechange', function(){
+        if(newSW.state === 'installed' && navigator.serviceWorker.controller){
+          // Có bản mới - hiện thông báo
+          showUpdateBanner();
+        }
+      });
+    });
+  }).catch(function(e){ console.log('SW error:', e); });
+
+  // Tự reload khi SW mới activate
+  var refreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', function(){
+    if(!refreshing){ refreshing = true; window.location.reload(); }
+  });
+}
+
+function showUpdateBanner(){
+  var banner = document.getElementById('update-banner');
+  if(banner) banner.style.display = 'flex';
+}
+function applyUpdate(){
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.getRegistration().then(function(reg){
+      if(reg && reg.waiting){
+        reg.waiting.postMessage('SKIP_WAITING');
+      } else {
+        window.location.reload(true);
+      }
+    });
+  }
+  var banner = document.getElementById('update-banner');
+  if(banner) banner.style.display = 'none';
+}
+
+// ─── PWA Install banner ───────────────────────────────────────────────────────
 var deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', function(e){
   e.preventDefault();
   deferredPrompt = e;
-  document.getElementById('pwa-banner').style.display = 'flex';
+  var b = document.getElementById('pwa-banner');
+  if(b) b.style.display = 'flex';
 });
 window.addEventListener('appinstalled', function(){
-  document.getElementById('pwa-banner').style.display = 'none';
   deferredPrompt = null;
+  var b = document.getElementById('pwa-banner');
+  if(b) b.style.display = 'none';
 });
 function installPWA(){
-  if(!deferredPrompt){ alert('De cai app: Bam menu 3 cham tren Chrome => Add to Home screen'); return; }
+  if(!deferredPrompt){
+    alert('De cai app: Bam menu 3 cham tren Chrome => Add to Home screen');
+    return;
+  }
   deferredPrompt.prompt();
   deferredPrompt.userChoice.then(function(r){
     deferredPrompt = null;
-    document.getElementById('pwa-banner').style.display = 'none';
+    var b = document.getElementById('pwa-banner');
+    if(b) b.style.display = 'none';
   });
 }
 </script>
 
+<!-- Update Banner -->
+<div id="update-banner" style="display:none;position:fixed;top:0;left:0;right:0;background:#1D9E75;color:#fff;padding:10px 16px;z-index:600;align-items:center;gap:10px;max-width:500px;margin:0 auto">
+  <div style="flex:1;font-size:13px;font-weight:500">Co phien ban moi! Cap nhat ngay?</div>
+  <button onclick="applyUpdate()" style="background:#fff;color:#0F6E56;border:none;border-radius:8px;padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer">Cap nhat</button>
+  <button onclick="document.getElementById('update-banner').style.display='none'" style="background:rgba(255,255,255,.2);color:#fff;border:none;border-radius:8px;padding:7px 10px;font-size:13px;cursor:pointer">&#10005;</button>
+</div>
 <!-- PWA Install Banner -->
 <div id="pwa-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#185FA5;color:#fff;padding:12px 16px;z-index:500;align-items:center;gap:12px;max-width:500px;margin:0 auto">
   <div style="flex:1;font-size:14px;font-weight:500">Cai app MEP Inspection ve dien thoai?</div>
