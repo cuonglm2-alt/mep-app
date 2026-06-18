@@ -139,6 +139,16 @@ input:focus,select:focus{outline:none;border-color:var(--blue)}
 .rc-band.ok{background:var(--greenbg);border:1px solid var(--greenmid)}
 .rc-band b{font-weight:700}
 .lnk{background:none;border:none;color:var(--blue);font-size:12px;cursor:pointer;text-decoration:underline;padding:0;font-family:inherit}
+
+.grp-header{display:flex;align-items:center;gap:8px;padding:10px 14px;background:#185FA5;color:#fff;border-radius:var(--r);cursor:pointer;user-select:none;margin-bottom:2px}
+.grp-name{flex:1;font-size:14px;font-weight:600}
+.grp-stats{font-size:12px;opacity:.85}
+.grp-arrow{font-size:14px;transition:transform .2s;display:inline-block}
+.grp-arrow.collapsed{transform:rotate(-90deg)}
+.grp-body{display:flex;flex-direction:column;gap:8px;margin-bottom:8px}
+.grp-body.hidden{display:none}
+.grp-wrap{margin-bottom:4px}
+.drag-handle{cursor:grab;color:var(--tx3);font-size:16px;padding:2px 6px 2px 0;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -169,25 +179,30 @@ input:focus,select:focus{outline:none;border-color:var(--blue)}
       <div class="stat-box"><div class="stat-num" id="h-fail" style="color:var(--redmid)">0</div><div class="stat-lbl">Có lỗi</div></div>
     </div>
   </div>
-  <div class="sec-label">Hệ thống cơ điện</div>
-  <button class="sys-btn" onclick="openSys('ELE')">
-    <div class="sys-icon" style="background:var(--bluebg)">⚡</div>
-    <div style="flex:1"><div class="sys-name">Hệ thống điện</div><div class="sys-sub" id="sc-ELE">—</div></div>
+  <div class="sec-label">Hệ thống an toàn & môi trường</div>
+  <button class="sys-btn" onclick="openSys('ATTC')">
+    <div class="sys-icon" style="background:var(--bluebg)">⛑️</div>
+    <div style="flex:1"><div class="sys-name">An toàn thi công</div><div class="sys-sub" id="sc-ATTC">—</div></div>
     <span style="color:var(--tx3);font-size:20px">›</span>
   </button>
-  <button class="sys-btn" onclick="openSys('HVAC')">
-    <div class="sys-icon" style="background:var(--tealbg)">💨</div>
-    <div style="flex:1"><div class="sys-name">Hệ thống HVAC / cơ khí</div><div class="sys-sub" id="sc-HVAC">—</div></div>
+  <button class="sys-btn" onclick="openSys('ATNN')">
+    <div class="sys-icon" style="background:var(--amberbg)">⚙️</div>
+    <div style="flex:1"><div class="sys-name">An toàn thiết bị nghiêm ngặt</div><div class="sys-sub" id="sc-ATNN">—</div></div>
     <span style="color:var(--tx3);font-size:20px">›</span>
   </button>
-  <button class="sys-btn" onclick="openSys('PCCC')">
-    <div class="sys-icon" style="background:var(--redbg)">🔥</div>
-    <div style="flex:1"><div class="sys-name">Hệ thống PCCC</div><div class="sys-sub" id="sc-PCCC">—</div></div>
+  <button class="sys-btn" onclick="openSys('ATDIEN')">
+    <div class="sys-icon" style="background:var(--redbg)">⚡</div>
+    <div style="flex:1"><div class="sys-name">An toàn thi công điện</div><div class="sys-sub" id="sc-ATDIEN">—</div></div>
     <span style="color:var(--tx3);font-size:20px">›</span>
   </button>
-  <button class="sys-btn" onclick="openSys('PS')">
-    <div class="sys-icon" style="background:var(--amberbg)">💧</div>
-    <div style="flex:1"><div class="sys-name">Hệ thống cấp thoát nước</div><div class="sys-sub" id="sc-PS">—</div></div>
+  <button class="sys-btn" onclick="openSys('ATTP')">
+    <div class="sys-icon" style="background:var(--tealbg)">🍽️</div>
+    <div style="flex:1"><div class="sys-name">An toàn thực phẩm</div><div class="sys-sub" id="sc-ATTP">—</div></div>
+    <span style="color:var(--tx3);font-size:20px">›</span>
+  </button>
+  <button class="sys-btn" onclick="openSys('MT')">
+    <div class="sys-icon" style="background:var(--greenbg)">🌿</div>
+    <div style="flex:1"><div class="sys-name">Môi trường</div><div class="sys-sub" id="sc-MT">—</div></div>
     <span style="color:var(--tx3);font-size:20px">›</span>
   </button>
   <div id="admin-tap-zone" onclick="adminTap()" style="margin-top:4px;padding:8px 0;text-align:center;cursor:default;user-select:none">
@@ -279,10 +294,11 @@ input:focus,select:focus{outline:none;border-color:var(--blue)}
 <div class="page" id="page-admin">
   <div class="sec-label">Chọn hệ thống để chỉnh sửa checklist</div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-    <button class="cat-btn" onclick="adminSys('ELE')" style="flex-direction:column;align-items:flex-start;gap:4px"><span style="font-size:20px">⚡</span><span style="font-size:13px;font-weight:600">Hệ thống điện</span></button>
-    <button class="cat-btn" onclick="adminSys('HVAC')" style="flex-direction:column;align-items:flex-start;gap:4px"><span style="font-size:20px">💨</span><span style="font-size:13px;font-weight:600">HVAC / cơ khí</span></button>
-    <button class="cat-btn" onclick="adminSys('PCCC')" style="flex-direction:column;align-items:flex-start;gap:4px"><span style="font-size:20px">🔥</span><span style="font-size:13px;font-weight:600">PCCC</span></button>
-    <button class="cat-btn" onclick="adminSys('PS')" style="flex-direction:column;align-items:flex-start;gap:4px"><span style="font-size:20px">💧</span><span style="font-size:13px;font-weight:600">Cấp thoát nước</span></button>
+    <button class="cat-btn" onclick="adminSys('ATTC')" style="flex-direction:column;align-items:flex-start;gap:4px"><span style="font-size:20px">⛑️</span><span style="font-size:13px;font-weight:600">An toàn thi công</span></button>
+    <button class="cat-btn" onclick="adminSys('ATNN')" style="flex-direction:column;align-items:flex-start;gap:4px"><span style="font-size:20px">⚙️</span><span style="font-size:13px;font-weight:600">An toàn TB nghiêm ngặt</span></button>
+    <button class="cat-btn" onclick="adminSys('ATDIEN')" style="flex-direction:column;align-items:flex-start;gap:4px"><span style="font-size:20px">⚡</span><span style="font-size:13px;font-weight:600">An toàn điện</span></button>
+    <button class="cat-btn" onclick="adminSys('ATTP')" style="flex-direction:column;align-items:flex-start;gap:4px"><span style="font-size:20px">🍽️</span><span style="font-size:13px;font-weight:600">An toàn thực phẩm</span></button>
+    <button class="cat-btn" onclick="adminSys('MT')" style="flex-direction:column;align-items:flex-start;gap:4px"><span style="font-size:20px">🌿</span><span style="font-size:13px;font-weight:600">Môi trường</span></button>
   </div>
 </div>
 
@@ -322,224 +338,484 @@ input:focus,select:focus{outline:none;border-color:var(--blue)}
 <script>
 // ─── DEFAULT DATA ───────────────────────────────────────────────────────────
 const DEFAULT_CATS = {
-  ELE: [
-    { id:'ele1', name:'Đèn chiếu sáng', icon:'💡', items:[
-      'Kiểm tra loại đèn: đúng chủng loại theo thiết kế (LED, downlight, tube...)',
-      'Kiểm tra công suất đèn: đúng wattage theo thiết kế',
-      'Kiểm tra vị trí lắp đặt: đúng tọa độ theo bản vẽ',
-      'Kiểm tra cao độ lắp đặt: đúng thiết kế',
-      'Kiểm tra mặt nạ đèn: phẳng, khít trần, không hở khe',
-      'Kiểm tra đấu nối dây điện: đúng cực, siết chặt đầu cos',
-      'Kiểm tra hoạt động thực tế: đèn sáng bình thường, không nhấp nháy',
-      'Kiểm tra nhiệt độ màu ánh sáng: đúng yêu cầu (warm/cool/neutral)',
-      'Kiểm tra đèn khẩn cấp: hoạt động khi mất điện lưới',
-      'Kiểm tra nhãn mạch điện tại CB nguồn'
+  ATTC: [
+    {id:'attc1', name:'Kiem tra hang ngay tren cong truong', icon:'🏗️', groups:[
+      {g:'Trang bi bao ho ca nhan (PPE)', items:[
+        'Tat ca cong nhan mac du mu bao hiem, ao phan quang, giay bao ho',
+        'Gang tay bao ho phu hop voi tinh chat cong viec',
+        'Kinh bao ho, mat na bao ve khi can thiet',
+        'Day an toan cho cong nhan lam viec tren cao'
+      ]},
+      {g:'Khu vuc thi cong', items:[
+        'Co bien bao canh bao, hang rao bao ve khu vuc thi cong',
+        'Duong di lai thong thoang, khong vuong vat',
+        'He thong chieu sang du dieu kien lam viec ban dem (neu co)',
+        'Khong co vat lieu de o nhung vi tri nguy hiem (cao, tren dau nguoi)'
+      ]},
+      {g:'An toan may moc thiet bi', items:[
+        'May moc thiet bi co bien bao canh bao, rao chan day du',
+        'May moc duoc kiem tra truoc khi su dung',
+        'Khong de may moc ro ri dau tren mat bang',
+        'Nguoi van hanh co chung chi phu hop'
+      ]},
+      {g:'Phong chay chua chay', items:[
+        'Binh chua chay du so luong, con han su dung, dung vi tri',
+        'Khong de chat de chay gan nguon nhiet, tia lua',
+        'Lo thoat nan ro rang, khong bi can quang',
+        'Co nguoi giam sat an toan tai cac vi tri nguy hiem'
+      ]},
+      {g:'So cuu & Ung pho khan cap', items:[
+        'Bo so cuu co san tai khu vuc thi cong',
+        'Cong nhan biet vi tri bo so cuu va cach su dung',
+        'So y te / cap cuu duoc niem yet tai cong truong'
+      ]}
     ]},
-    { id:'ele2', name:'Tủ điện', icon:'🗄️', items:[
-      'Kiểm tra vị trí lắp đặt tủ: đúng bản vẽ, không bị che khuất',
-      'Kiểm tra tình trạng vỏ tủ: sơn nguyên vẹn, không móp, không rỉ sét',
-      'Kiểm tra cửa tủ: đóng mở trơn tru, khoá hoạt động',
-      'Kiểm tra tiếp địa tủ (PE busbar): đấu nối đúng, siết chặt',
-      'Kiểm tra busbar N (neutral): kích thước đúng, đấu nối hoàn chỉnh',
-      'Kiểm tra CB tổng: đúng chủng loại, dòng cắt đúng thiết kế',
-      'Kiểm tra CB nhánh: đúng chủng loại, nhãn ghi rõ tên mạch',
-      'Kiểm tra đi dây trong tủ: gọn gàng, buộc dây, có nhãn',
-      'Kiểm tra đầu cos: đúng size, siết chặt, không tiếp xúc lỏng',
-      'Kiểm tra khoảng cách pha: đủ khoảng cách an toàn',
-      'Kiểm tra sơ đồ đơn tuyến: dán bên trong tủ, cập nhật đúng thực tế',
-      'Kiểm tra tủ sạch sẽ: không bụi, không dây thừa, không vật lạ'
+    {id:'attc2', name:'Kiem tra lam viec tren cao', icon:'🪜', groups:[
+      {g:'Giay phep & Danh gia rui ro', items:[
+        'Co giay phep lam viec tren cao cho cong viec tren 2m',
+        'JSA da duoc thuc hien truoc khi bat dau cong viec',
+        'Thoi tiet thuan loi, khong mua / gio manh'
+      ]},
+      {g:'Gian giao & San cong tac', items:[
+        'Gian giao da duoc kiem tra va chap thuan truoc khi su dung',
+        'San cong tac chiu tai trong du, khong bi lung lay',
+        'Co lan can bao ve it nhat 1m chieu cao',
+        'Co tao do 15cm phong vat lieu roi'
+      ]},
+      {g:'Day an toan & Bao ho', items:[
+        'Day an toan duoc doi va moc vao diem co dinh chac chan',
+        'Thang leo an toan, co nguoi giu hoac buoc co dinh',
+        'Khong de dung cu, vat lieu o mep san co the roi xuong',
+        'Co luoi bao ve hoac tam chan phong roi vat lieu'
+      ]},
+      {g:'Rao chan khu vuc phia duoi', items:[
+        'Khu vuc phia duoi co rao chan, bien canh bao cam nguoi vao',
+        'Co nguoi gac tai khu vuc phia duoi trong khi thi cong',
+        'He thong chong set neu lam viec gan duong day dien'
+      ]}
     ]},
-    { id:'ele3', name:'Công tắc & ổ điện', icon:'🔌', items:[
-      'Kiểm tra vị trí lắp đặt: đúng cao độ (công tắc 1.2m, ổ điện 0.3m hoặc theo thiết kế)',
-      'Kiểm tra mặt nạ công tắc/ổ điện: phẳng, khít tường, không hở',
-      'Kiểm tra đấu nối dây: đúng cực L-N-PE, siết chặt',
-      'Kiểm tra hoạt động công tắc: bật/tắt đúng mạch chiếu sáng',
-      'Kiểm tra ổ điện có điện: dùng bút thử hoặc thiết bị đo',
-      'Kiểm tra ổ điện có tiếp địa: đo điện trở tiếp địa',
-      'Kiểm tra chủng loại ổ điện: đúng spec (2P, 3P, 16A, 20A...)',
-      'Kiểm tra nhãn mạch tại CB nguồn cấp'
-    ]},
-    { id:'ele4', name:'Hệ thống cáp điện', icon:'🔋', items:[
-      'Kiểm tra loại cáp: đúng chủng loại, tiết diện theo thiết kế',
-      'Kiểm tra cable tray/conduit: lắp đúng tuyến, thẳng hàng, cố định',
-      'Kiểm tra khoảng cách thanh đỡ cable tray: ≤ 1.5m (ngang), ≤ 1.2m (đứng)',
-      'Kiểm tra bend/elbow: không sắc cạnh, không bavia, không bị bẹp cáp',
-      'Kiểm tra màu sắc dây dẫn: đúng tiêu chuẩn (vàng-xanh PE, xanh dương N, đỏ/đen/nâu L)',
-      'Kiểm tra đầu cos/đầu nối: đúng size, ép/siết đúng kỹ thuật',
-      'Kiểm tra độ lấp đầy cable tray: không quá 70% tiết diện',
-      'Kiểm tra khoảng cách giữa cáp điện và cáp dữ liệu',
-      'Kiểm tra cáp không bị gập, không bị xoắn, không bị tì đè',
-      'Kiểm tra nhãn cáp tại hai đầu: rõ ràng, đúng mạch'
-    ]},
-    { id:'ele5', name:'Tiếp địa & chống sét', icon:'⚡', items:[
-      'Kiểm tra điện cực tiếp địa: đúng chủng loại (cọc đồng/thép mạ), đủ chiều dài',
-      'Kiểm tra điện trở tiếp địa: đo thực tế ≤ 10Ω (hoặc theo yêu cầu thiết kế)',
-      'Kiểm tra dây tiếp địa: đúng tiết diện, màu vàng-xanh',
-      'Kiểm tra kết nối dây tiếp địa tủ điện: siết chặt',
-      'Kiểm tra hệ thống kim thu sét: đúng vị trí, đủ bán kính bảo vệ',
-      'Kiểm tra dây dẫn sét: đúng tuyến, không có mối nối không kiểm soát',
-      'Kiểm tra hố kiểm tra tiếp địa: có nắp, có dán nhãn'
+    {id:'attc3', name:'Kiem tra PCCC tren cong truong', icon:'🧯', groups:[
+      {g:'Trang bi chua chay', items:[
+        'Binh chua chay du so luong, con han, dung vi tri quy dinh',
+        'Loai binh phu hop voi rui ro tai khu vuc (CO2 cho dien)',
+        'Cong nhan duoc huan luyen su dung binh chua chay'
+      ]},
+      {g:'Phong ngua nguon lua', items:[
+        'Khong de chat de chay gan nguon nhiet, tia lua',
+        'Khu vuc han cat co man chan tia lua va nguoi giam sat',
+        'Khong hut thuoc trong khu vuc co chat de chay',
+        'He thong dien tam thi cong khong qua tai, co CB bao ve'
+      ]},
+      {g:'Thoat nan & Ung pho', items:[
+        'Lo thoat nan duoc chi dan ro rang, khong bi can quang',
+        'Tat ca cong nhan biet vi tri lo thoat nan',
+        'Co ke hoach ung pho khan cap PCCC tai cong truong',
+        'Chat thai, vat lieu du thua duoc thu gom va xu ly dung quy dinh'
+      ]}
     ]}
   ],
-  HVAC: [
-    { id:'hvac1', name:'FCU / Fan Coil Unit', icon:'❄️', items:[
-      'Kiểm tra vị trí lắp đặt FCU: đúng tọa độ theo bản vẽ',
-      'Kiểm tra cao độ lắp đặt: đúng thiết kế, đảm bảo khoảng cách bảo trì',
-      'Kiểm tra thanh treo/giá đỡ FCU: vững chắc, đủ số lượng bu-lông',
-      'Kiểm tra kết nối đường ống nước lạnh (supply/return): không rò rỉ',
-      'Kiểm tra van cô lập đường ống: hoạt động, có nhãn',
-      'Kiểm tra kết nối đường điện FCU: đúng cực, có CB bảo vệ riêng',
-      'Kiểm tra đường thoát nước ngưng: có độ dốc ≥ 1%, không tắc',
-      'Kiểm tra drain pan: sạch, không rò rỉ',
-      'Kiểm tra hoạt động FCU: chạy ở các tốc độ Low/Med/High',
-      'Kiểm tra lưới lọc không khí: sạch, lắp đúng vị trí',
-      'Kiểm tra tấm panel trang trí FCU: phẳng, khít trần'
+  ATNN: [
+    {id:'atnn1', name:'Cau banh hoi (TT-HSE-F06.2)', icon:'🏗️', groups:[
+      {g:'May / Engine', items:[
+        'Nuoc lam mat (Cooling Water)',
+        'Nhien lieu (Fuel Oil)',
+        'Dau may (Engine Oil)',
+        'Dong ho do (Gauges)',
+        'Khi thai, am thanh (Exhaust Gas / Sound)',
+        'Day curoa (Fan Belt)',
+        'Thiet bi keo day can (Boom Telescopic / Hoist Device)'
+      ]},
+      {g:'May moc phia tren / Upper Machine', items:[
+        'Su vuon can (Boom Telescopic)',
+        'Thiet bi keo (Hoist Device)',
+        'Thiet bi xoay (Swing Device)',
+        'Bo toi (Winch Unit)',
+        'He thong chan cau (Outrigger)',
+        'Can (Boom)',
+        'He thong truc dau can (Sheave)',
+        'Day cap (Wire Rope / Sling)'
+      ]},
+      {g:'Thiet bi hanh trinh / Travelling', items:[
+        'Thiet bi lai (Steering)',
+        'Banh xe (Tyre)',
+        'Phanh (Brake)'
+      ]},
+      {g:'Thiet bi an toan / Safety Device', items:[
+        'Thiet bi han chan dau can (Over-Hoist Prevention Device)',
+        'Dong ho chi bao mo men toi han (Moment Limiter)',
+        'Thiet bi khoa (Lock Device)',
+        'Coi hieu (Horn / Reverse Horn)',
+        'Chot an toan (Safety Latch)',
+        'Den sang / den bao (Light / Pilot Lamp)',
+        'Thiet bi chi bao do dai can (Boom Length Indicator)',
+        'Guong (Mirrors)',
+        'Tam giac hieu mau do (Reflector Red Triangle)',
+        'Bo so cuu (First Aid Kits)',
+        'Thiet bi chua chay (Fire Extinguisher)',
+        'Dung cu chong tran dau (Spill Kits)'
+      ]}
     ]},
-    { id:'hvac2', name:'Đường ống gió (Ductwork)', icon:'🌀', items:[
-      'Kiểm tra kích thước ống gió: đúng thiết kế',
-      'Kiểm tra vật liệu ống gió: đúng spec (galvanized, pre-insulated...)',
-      'Kiểm tra tuyến đi ống gió: đúng bản vẽ, không xung đột MEP khác',
-      'Kiểm tra ống gió không bị méo, bẹp, thủng',
-      'Kiểm tra kết nối flange/joint: kín, có dán tape đúng kỹ thuật',
-      'Kiểm tra thanh đỡ ống gió: khoảng cách ≤ 2m, vững chắc',
-      'Kiểm tra insulation ống gió: đủ chiều dày, không bị hở, không bị ẩm',
-      'Kiểm tra damper (van gió): hoạt động, có nhãn',
-      'Kiểm tra flexible duct kết nối miệng gió: đủ độ dài, không xoắn'
+    {id:'atnn2', name:'Xe cau banh xich (TT-HSE-F06.3)', icon:'🚜', groups:[
+      {g:'May / Engine', items:[
+        'Nuoc lam mat (Cooling Water)',
+        'Nhien lieu (Fuel Oil)',
+        'Dau may (Engine Oil)',
+        'Dong ho do (Gauges)',
+        'Khi thai, am thanh (Exhaust Gas / Sound)',
+        'Day curoa (Fan Belt)'
+      ]},
+      {g:'May moc phia tren / Upper Machine', items:[
+        'Day cap keo (Boom Hoist)',
+        'Thiet bi xoay (Swing Device)',
+        'Bo toi (Winch Unit)',
+        'Day cap (Wire Rope)',
+        'Bo toi dau can (Sheave)'
+      ]},
+      {g:'Thiet bi hanh trinh / Travelling', items:[
+        'Banh xich (Track Link)',
+        'Dau mo (Greasing Up)',
+        'Phanh (Brake)'
+      ]},
+      {g:'Thiet bi an toan / Safety Device', items:[
+        'Thiet bi chan day keo dau can (Over-Hoist Prevention Device)',
+        'Dong ho chi bao mo men toi han (Moment Limiter)',
+        'Thiet bi khoa (Lock Device)',
+        'Banh khop an toan (Safety Catch)',
+        'Guong (Mirrors)',
+        'Binh chua chay (Portable Fire Extinguisher)',
+        'Dung cu chong tran dau (Spill Kits)',
+        'Bo so cuu (First Aid Kit)',
+        'Bien bao tam giac mau do (Reflector Red Triangle)'
+      ]}
     ]},
-    { id:'hvac3', name:'Miệng gió (Diffuser/Grille)', icon:'💨', items:[
-      'Kiểm tra loại miệng gió: đúng chủng loại theo thiết kế',
-      'Kiểm tra kích thước miệng gió: đúng thiết kế',
-      'Kiểm tra vị trí lắp đặt: đúng tọa độ, thẳng hàng với trần',
-      'Kiểm tra mặt nạ miệng gió: phẳng, khít trần, không hở khe',
-      'Kiểm tra kết nối flexible duct: kín, không xoắn',
-      'Kiểm tra lưu lượng gió thực tế: đo bằng anemometer',
-      'Kiểm tra hướng thổi gió: đúng hướng thiết kế'
+    {id:'atnn3', name:'Xe nang hang (TT-HSE-F06.4)', icon:'🚛', groups:[
+      {g:'May / Engine', items:[
+        'Nuoc lam mat (Cooling Water)',
+        'Nhien lieu (Fuel Oil)',
+        'Dau may (Engine Oil)',
+        'Dong ho do (Gauges)',
+        'Khi thai, am thanh (Exhaust Gas / Sound)',
+        'Day curoa (Fan Belt)'
+      ]},
+      {g:'May moc phia tren / Upper Machine', items:[
+        'Bo truyen dong (Transmission)',
+        'Ban quay (Turn Table)',
+        'He thong thuy luc (Hydraulic System)',
+        'Bua khoan / canh tay don / can vuon (Jackhammer / Arm / Boom)',
+        'Dinh (Pins)',
+        'Day xich (Chain)'
+      ]},
+      {g:'Thiet bi truyen dong / Drive Device', items:[
+        'Banh xe (Tyre)',
+        'Banh xich (Track Link)',
+        'Phanh ham (Brake)'
+      ]},
+      {g:'Thiet bi an toan / Safety Device', items:[
+        'Canh bao toi han (Reverse Alarm)',
+        'Coi canh bao (Warning Horn)',
+        'Guong (Mirrors)',
+        'Den (Light)',
+        'Day dai an toan (Seat Belt)',
+        'Binh chua chay (Portable Fire Extinguisher)',
+        'Dung cu chong tran dau (Spill Kits)',
+        'Tui so cuu (First Aid Kits)',
+        'Bien bao tam giac do (Reflector Red Triangle)'
+      ]}
     ]},
-    { id:'hvac4', name:'AHU / Máy xử lý không khí', icon:'🏭', items:[
-      'Kiểm tra vị trí lắp đặt AHU: đúng bản vẽ, có đủ không gian bảo trì',
-      'Kiểm tra lắp đặt chân đế chống rung AHU',
-      'Kiểm tra kết nối đường ống nước lạnh: không rò rỉ, có van cô lập',
-      'Kiểm tra kết nối đường điện AHU: đúng công suất, có CB',
-      'Kiểm tra lưới lọc không khí: sạch, lắp đúng',
-      'Kiểm tra coil lạnh: sạch, không bị xẹp cánh tản nhiệt',
-      'Kiểm tra quạt AHU: hoạt động, không rung lắc bất thường',
-      'Kiểm tra đường thoát nước ngưng AHU',
-      'Kiểm tra đường ống gió kết nối AHU: kín, đúng tiết diện'
+    {id:'atnn4', name:'May nen khi (TT-HSE-F06.5)', icon:'💨', groups:[
+      {g:'May / Engine', items:[
+        'Nuoc lam mat (Cooling Water)',
+        'Nhien lieu (Fuel Oil)',
+        'Dau may (Engine Oil)',
+        'Dong ho do (Gauges)',
+        'Khi thai, am thanh (Exhaust Gas / Sound)',
+        'Day curoa (Fan Belt)'
+      ]},
+      {g:'May nen / Compressor', items:[
+        'Tinh trang chung (General Condition)',
+        'Dong ho do (Meters)',
+        'Ket dau (Oil Tank)',
+        'Bien ap lam mat dau (Oil Cooler - Rotary Screw)',
+        'He thong lam mat (Cooling System)',
+        'Thiet bi loc khi (Air Cleaner)',
+        'He thong ngung khan cap (Emergency Stop System)',
+        'Van dieu chinh (Regulator Unloader)',
+        'Phanh ham (Parking Brake)',
+        'Duong ong (Piping)'
+      ]}
+    ]},
+    {id:'atnn5', name:'Xe nang tu hanh (TT-HSE-F06.6)', icon:'🚗', groups:[
+      {g:'May / Engine', items:[
+        'Dau, nuoc va ro ri nhien lieu (Oil, water and fuel leakage)',
+        'Tinh trang va muc dau boi tron (Lubricant level and condition)',
+        'Suc cang day curoa (Fan belt tension)'
+      ]},
+      {g:'He thong thuy luc / Hydraulic System', items:[
+        'Tinh trang va muc dau thuy luc (Hydraulic oil level and condition)',
+        'Dieu kien lam viec cua van va don bay (Control lever and valve)',
+        'Tinh trang lam viec cua may bom (Pump working condition)',
+        'Tinh trang cac ong thuy luc (Hydraulic hoses condition)',
+        'Tinh trang lam viec cua may (Motor working condition)'
+      ]},
+      {g:'He thong dien / Electrical', items:[
+        'Muc nuoc trong ac quy (Battery water level)',
+        'He thong chieu sang - den hieu, canh bao, phanh (Lighting - Signal, Warning, Brake)'
+      ]},
+      {g:'Thiet bi an toan / Safety Devices', items:[
+        'Trang thiet bi chua chay (Fire Extinguisher)',
+        'Dung cu chong tran dau (Spill Kits)',
+        'He thong bao hieu lui / di chuyen / quay (Reverse / Movement / Swing alarm)',
+        'He thong phanh (Brake Travel Parking)',
+        'Den nhap nhay khi di chuyen tien, lui (Blinking light forward and reverse)',
+        'Coi hieu (Horn)',
+        'Nhan canh bao / bang du lieu tai trong (Warning Labels / Capacity Data Plate)'
+      ]}
+    ]},
+    {id:'atnn6', name:'May xuc dao (TT-HSE-F06.7)', icon:'🚧', groups:[
+      {g:'Giay phep & Danh gia rui ro', items:[
+        'May moc dao xuc co duoc phep su dung? (Are Excavation Permits In Use?)',
+        'Cac giay phep con hieu luc? (Are Permits Up To Date?)',
+        'Danh gia rui ro JSA truoc khi thi cong, ra soat lai moi ngay',
+        'Phuong phap lam viec an toan (SWMS) phai su dung va cap nhat khi co thay doi',
+        'Quy trinh ung pho truong hop khan cap (Emergency procedures in place)',
+        'Giay phep lam viec co san (Permit to Work is in place)'
+      ]},
+      {g:'Bien phap ky thuat & An toan', items:[
+        'Loi ra vao hop ly? (Is Correct Access Provided?)',
+        'Hang rao canh bao khu vuc lam viec (Are Barriers Provided?)',
+        'Noi dao xuc cach bo kenh hon 1m phai lam doc an toan',
+        'May xuc lam viec o do sau >= 1.2m phai co cot chong do (Must be shored)',
+        'Co nguoi giam sat tai khu vuc dao xuc',
+        'May moc co the gay chay khong duoc de gan noi dao xuc',
+        'Cac phia co thong thoang? (Are The Sides Benched?)',
+        'Ho phai duoc bao ve bang rao chan cung (Hard barricade)',
+        'Noi dao xuc da duoc xem nhu khu vuc kin? (Confined Space?)'
+      ]}
     ]}
   ],
-  PCCC: [
-    { id:'pccc1', name:'Đầu báo cháy', icon:'🚨', items:[
-      'Kiểm tra loại đầu báo: đúng chủng loại theo thiết kế (khói quang, khói ion, nhiệt)',
-      'Kiểm tra vị trí lắp đặt: đúng tọa độ, khoảng cách đúng tiêu chuẩn TCVN',
-      'Kiểm tra cao độ lắp đặt: đúng theo yêu cầu (thường ≤ 0.5m từ trần)',
-      'Kiểm tra khoảng cách giữa các đầu báo: đúng theo diện tích bảo vệ',
-      'Kiểm tra kết nối dây tín hiệu: đúng địa chỉ zone, siết chặt',
-      'Kiểm tra đầu báo không bị che khuất bởi vật cản',
-      'Kiểm tra hoạt động thực tế: test từng đầu báo bằng bình test',
-      'Kiểm tra tín hiệu phản hồi về tủ trung tâm báo cháy',
-      'Kiểm tra nhãn zone trên đầu báo'
+  ATDIEN: [
+    {id:'atd1', name:'An toan truoc khi lam viec voi dien', icon:'🔒', groups:[
+      {g:'Tat nguon & Khoa LOTO', items:[
+        'Tat nguon truoc khi lam viec, kiem tra bang but thu dien',
+        'Treo bien bao "Dang sua chua - Cam dong dien" tai CB tong',
+        'Bao ve mach dien da tat bang khoa hoac thiet bi LOTO',
+        'Khong lam viec mot minh voi thiet bi dien cao ap'
+      ]},
+      {g:'Dung cu & PPE', items:[
+        'Su dung but thu dien kiem tra truoc khi cham vao mach',
+        'Gang tay cach dien dung cap dien ap',
+        'Giay cach dien, mu bao ho chong dien',
+        'Kep, tua vit co tay cam cach dien'
+      ]},
+      {g:'Moi truong lam viec', items:[
+        'Khoang cach an toan giua cac phan mang dien duoc dam bao',
+        'Co nguoi giam sat an toan trong suot qua trinh thi cong',
+        'Binh chua chay CO2 co san tai khu vuc tu dien',
+        'Kiem tra cap noi dat (PE) truoc khi lam viec'
+      ]}
     ]},
-    { id:'pccc2', name:'Hệ thống sprinkler', icon:'💦', items:[
-      'Kiểm tra loại đầu phun: đúng chủng loại (upright, pendent, sidewall, concealed)',
-      'Kiểm tra nhiệt độ kích hoạt đầu phun: đúng thiết kế (68°C, 93°C...)',
-      'Kiểm tra vị trí lắp đặt: đúng tọa độ, đúng khoảng cách bảo vệ',
-      'Kiểm tra đầu phun không bị che khuất (kệ, vách ngăn, cột...)',
-      'Kiểm tra đầu phun concealed: mặt nắp phẳng với trần, đúng màu',
-      'Kiểm tra đường ống sprinkler: không rò rỉ, đúng tuyến',
-      'Kiểm tra áp suất hệ thống: đúng thiết kế (thường ≥ 0.5 bar tại đầu xa)',
-      'Kiểm tra van alarm check: hoạt động, không rò rỉ',
-      'Kiểm tra van khu vực (zone valve): hoạt động, có nhãn',
-      'Kiểm tra flow switch: kết nối tín hiệu về tủ PCCC'
+    {id:'atd2', name:'Kiem tra day dan va cap dien', icon:'🔌', groups:[
+      {g:'Chat luong cap & Day dan', items:[
+        'Cap dien duoc kiem tra cach dien truoc khi dau noi',
+        'Khong su dung cap bi hong lop bao ve, tran day dan',
+        'Moi noi cap duoc boc kin bang bang keo cach dien hoac dau noi chuyen dung',
+        'Dau cos dung size, ep / siet dung ky thuat'
+      ]},
+      {g:'Tuyen di cap', items:[
+        'Day dan di dung tuyen, co do cao an toan toi thieu 2.5m khu vuc di lai',
+        'Cap dien qua khu vuc di lai co bien bao va bao ve co hoc',
+        'Tai trong cap tray khong vuot qua 70% tiet dien',
+        'Khoang cach giua cap dien va cap tin hieu dung quy dinh'
+      ]},
+      {g:'Nhan mac & Quan ly', items:[
+        'Nhan cap tai hai dau ro rang, dung ten mach',
+        'Cap dien khong bi gap, khong bi xoan, khong bi ti de',
+        'He thong cap tam thi cong duoc kiem tra hang ngay'
+      ]}
     ]},
-    { id:'pccc3', name:'Họng nước chữa cháy & tủ PCCC', icon:'🧯', items:[
-      'Kiểm tra vị trí tủ họng nước: đúng bản vẽ, dễ tiếp cận',
-      'Kiểm tra trong tủ: đủ vòi phun, cuộn vòi, khóa góc, nhãn hướng dẫn',
-      'Kiểm tra cuộn vòi: không bị nứt, không bị xoắn, cuộn gọn',
-      'Kiểm tra áp suất tại họng nước: đúng thiết kế',
-      'Kiểm tra khóa góc: mở/đóng trơn tru, không rò rỉ',
-      'Kiểm tra đồng hồ áp suất (nếu có): hoạt động',
-      'Kiểm tra biển chỉ dẫn tủ PCCC: rõ ràng, đúng vị trí',
-      'Kiểm tra họng đấu nối xe cứu hoả (siamese): đúng vị trí, không bị bịt kín'
+    {id:'atd3', name:'Kiem tra he thong tiep dat', icon:'⚡', groups:[
+      {g:'Do luong & Kiem tra', items:[
+        'Dien tro tiep dat do duoc <= 10 Ohm',
+        'Dien tro cach dien cua cap / day dan >= 1 MOhm',
+        'He thong chong set da kiem tra, dien tro <= 10 Ohm'
+      ]},
+      {g:'Ket cau tiep dat', items:[
+        'Day tiep dat dung mau vang xanh, dung tiet dien theo thiet ke',
+        'Coc tiep dat duoc dong du chieu sau theo thiet ke',
+        'Tat ca vo thiet bi dien duoc noi dat day du',
+        'Bu thanh tiep dat (PE busbar) trong tu dien duoc siet chat',
+        'Day tiep dat khong bi dut, khong bi ri set',
+        'Ho kiem tra tiep dat co nap day nhan'
+      ]}
     ]},
-    { id:'pccc4', name:'Đèn EXIT & chiếu sáng sự cố', icon:'🚪', items:[
-      'Kiểm tra loại đèn EXIT: đúng chủng loại, có logo EXIT/THOÁT HIỂM',
-      'Kiểm tra vị trí lắp đặt: đúng tại các lối thoát hiểm, hành lang',
-      'Kiểm tra chiều cao lắp đặt: thường ≥ 2.0m hoặc gắn trên cửa',
-      'Kiểm tra đèn hoạt động bình thường khi có điện lưới',
-      'Kiểm tra đèn hoạt động khi mất điện lưới (chạy bằng pin)',
-      'Kiểm tra thời gian duy trì ánh sáng sự cố: ≥ 30 phút (theo TCVN)',
-      'Kiểm tra đèn chiếu sáng sự cố hành lang: bố trí đủ, đúng khoảng cách',
-      'Kiểm tra kết nối điện: đúng mạch, có bảo vệ CB riêng'
+    {id:'atd4', name:'Nghiem thu he thong dien sau thi cong', icon:'✅', groups:[
+      {g:'Truoc khi cap nguon', items:[
+        'Tat ca dau noi da hoan chinh, siet chat',
+        'Kiem tra chieu cach dien toan mach bang meg-ohm meter',
+        'Khong con nguoi hoac dung cu trong tu / mach dien'
+      ]},
+      {g:'Khi cap nguon lan dau', items:[
+        'Co nguoi giam sat tai tu dien va tai cac phu tai chinh',
+        'Kiem tra thu tu pha (phase sequence) dung chieu',
+        'Dong dien tai CB tong khong vuot qua dinh muc',
+        'Kiem tra dien ap tai cac diem cuoi mach: du va on dinh'
+      ]},
+      {g:'Nghiem thu & Ban giao', items:[
+        'Bien ban nghiem thu he thong dien da duoc ky',
+        'So do nguyen ly trong tu da cap nhat dung thuc te',
+        'Nhan CB, nhan mach dien day du ro rang',
+        'Ban giao tai lieu ky thuat cho chu dau tu'
+      ]}
     ]}
   ],
-  PS: [
-    { id:'ps1', name:'Đường ống cấp nước', icon:'🚿', items:[
-      'Kiểm tra loại ống: đúng vật liệu theo thiết kế (PPR, CPVC, inox...)',
-      'Kiểm tra đường kính ống: đúng thiết kế',
-      'Kiểm tra tuyến đi ống: đúng bản vẽ, không xung đột MEP',
-      'Kiểm tra mối hàn/kết nối ống: không rò rỉ, đúng kỹ thuật',
-      'Kiểm tra thanh đỡ/hanger ống: khoảng cách đúng theo đường kính ống',
-      'Kiểm tra van cô lập: đúng vị trí, hoạt động, có nhãn',
-      'Kiểm tra insulation ống nước lạnh: đủ chiều dày, không hở',
-      'Kiểm tra áp suất hệ thống: test thủy lực (1.5 lần áp suất làm việc)',
-      'Kiểm tra đồng hồ nước: lắp đúng chiều dòng chảy, dễ đọc chỉ số'
+  ATTP: [
+    {id:'attp1', name:'Ve sinh khu vuc bep & nha an', icon:'🍳', groups:[
+      {g:'Ve sinh co so vat chat', items:[
+        'San bep, san nha an sach se, kho rao, khong dong nuoc',
+        'Tuong, tran bep khong bi am moc, bong tran, no vua',
+        'He thong hut mui, thong gio bep hoat dong tot',
+        'Thung rac co nap day, duoc don hang ngay',
+        'Khong co dong vat nuoi trong khu vuc bep'
+      ]},
+      {g:'Ve sinh dung cu & Thiet bi', items:[
+        'Thiet bi che bien (dao, thot, noi) sach se, duoc khu trung',
+        'Tu lanh dat nhiet do quy dinh: chin <= 5 do C, dong lanh <= -18 do C',
+        'Khu vuc so che va khu vuc che bien chin phan tach ro rang',
+        'Dung cu che bien thuc an song va chin phan biet (mau sac khac nhau)'
+      ]},
+      {g:'Diet con trung & Kiem soat', items:[
+        'Diet chuot, gian, ruoi dinh ky theo lich',
+        'Bay bay, bep dien diet con trung hoat dong tot',
+        'Cua so co luoi chan con trung'
+      ]}
     ]},
-    { id:'ps2', name:'Đường ống thoát nước', icon:'🪣', items:[
-      'Kiểm tra loại ống thoát nước: đúng vật liệu (uPVC, HDPE...)',
-      'Kiểm tra đường kính ống: đúng thiết kế',
-      'Kiểm tra độ dốc ống thoát nước nằm ngang: ≥ 1% (D<100mm) hoặc ≥ 0.5% (D≥100mm)',
-      'Kiểm tra kết nối ống: không rò rỉ, đúng kỹ thuật',
-      'Kiểm tra cleanout (nút thông tắc): đúng vị trí, có nắp',
-      'Kiểm tra bẫy nước (P-trap): lắp đúng, đủ chiều cao',
-      'Kiểm tra ống thông hơi (vent): đúng tuyến, thông thoáng',
-      'Kiểm tra floor drain: đúng vị trí, có nắp, đúng cao độ (thấp hơn sàn)',
-      'Kiểm tra test kín nước: đổ nước và giữ 30 phút không rò'
+    {id:'attp2', name:'Kiem tra nguon goc thuc pham', icon:'🥗', groups:[
+      {g:'Kiem tra khi nhap hang', items:[
+        'Tat ca thuc pham co nguon goc ro rang, co hoa don / chung tu',
+        'Kiem tra han su dung cua toan bo nguyen lieu truoc khi su dung',
+        'Thuc pham dong goi con nguyen ven, khong phong, mo'
+      ]},
+      {g:'Chat luong cam quan', items:[
+        'Rau cu qua tuoi, khong dap nat, khong bi sau benh',
+        'Thit, ca co mau sac binh thuong, khong co mui la',
+        'Nuoc uong / nuoc che bien dat tieu chuan an toan thuc pham',
+        'Gia vi, dau mo con han, bao quan dung cach'
+      ]},
+      {g:'Luu mau & Ho so', items:[
+        'Luu mau thuc an: giu lai 50g moi mon, bao quan 24 gio',
+        'Ho so kiem tra chat luong thuc pham duoc cap nhat hang ngay',
+        'Khong su dung thuc pham het han hoac nguon goc khong ro rang'
+      ]}
     ]},
-    { id:'ps3', name:'Thiết bị vệ sinh', icon:'🚽', items:[
-      'Kiểm tra loại thiết bị: đúng chủng loại theo thiết kế',
-      'Kiểm tra vị trí lắp đặt: đúng tọa độ, khoảng cách đúng tiêu chuẩn',
-      'Kiểm tra kết nối ống cấp nước vào thiết bị: không rò rỉ',
-      'Kiểm tra kết nối ống thoát nước: không rò rỉ, đúng kỹ thuật',
-      'Kiểm tra gắn chặt thiết bị vào tường/sàn: không lung lay',
-      'Kiểm tra hoạt động xả nước: bình thường, không tắc',
-      'Kiểm tra van cô lập thiết bị: hoạt động',
-      'Kiểm tra silicon trám kín: đều, liên tục, không hở',
-      'Kiểm tra bề mặt thiết bị: không trầy xước, không nứt vỡ'
+    {id:'attp3', name:'Ve sinh ca nhan nguoi che bien', icon:'🧼', groups:[
+      {g:'Suc khoe & Giay phep', items:[
+        'Nguoi che bien duoc kham suc khoe dinh ky, co so suc khoe con han',
+        'Khong lam viec khi dang mac benh truyen nhiem (sot, tieu chay, viem hong)'
+      ]},
+      {g:'Trang phuc & Ve sinh', items:[
+        'Mang tay, deo khau trang, mac tap de, doi mu khi lam viec',
+        'Mong tay cat ngan, sach se, khong son mong',
+        'Rua tay bang xa phong truoc khi che bien va sau khi di ve sinh',
+        'Deo gang tay khi che bien thuc an an san'
+      ]},
+      {g:'Hanh vi trong khu vuc bep', items:[
+        'Khong hut thuoc, khac nhoi trong khu vuc che bien thuc an',
+        'Khong deo trang suc, dong ho khi lam viec voi thuc pham',
+        'Khong an uong trong khu vuc so che'
+      ]}
     ]},
-    { id:'ps4', name:'Bơm & bể nước', icon:'⚙️', items:[
-      'Kiểm tra vị trí lắp đặt bơm: đúng bản vẽ, có chân đế chống rung',
-      'Kiểm tra thông số bơm: đúng lưu lượng, áp suất theo thiết kế',
-      'Kiểm tra kết nối ống hút và ống đẩy: không rò rỉ, có van cô lập',
-      'Kiểm tra van một chiều (check valve): lắp đúng chiều, hoạt động',
-      'Kiểm tra kết nối điện bơm: đúng công suất, có CB bảo vệ',
-      'Kiểm tra hoạt động bơm: không rung lắc bất thường, không ồn quá mức',
-      'Kiểm tra bể nước: kín, không rò rỉ, có nắp đậy',
-      'Kiểm tra phao tự động bể nước: hoạt động đúng mức nước',
-      'Kiểm tra áp suất hệ thống sau bơm: đúng thiết kế'
+    {id:'attp4', name:'Bao quan & Phan phoi thuc an', icon:'🍱', groups:[
+      {g:'Nhiet do bao quan', items:[
+        'Thuc an sau khi nau bao quan o nhiet do an toan (> 60 do C hoac < 5 do C)',
+        'Thuc an khong de o nhiet do phong qua 2 tieng',
+        'Khong phan phoi thuc an de qua lau (> 4 tieng o nhiet do phong)'
+      ]},
+      {g:'Dung cu & Van chuyen', items:[
+        'Hop dung thuc an sach se, co nap day, lam tu vat lieu an toan thuc pham',
+        'Xe day phan phoi suat an sach se, duoc khu trung hang ngay',
+        'Co bien bao ten mon an, thanh phan chinh, ngay gio nau'
+      ]},
+      {g:'Ve sinh khu vuc an uong', items:[
+        'Khu vuc an uong sach se, co du ban ghe',
+        'He thong thoat nuoc thai bep hoat dong tot, khong tac nghen',
+        'Nuoc rua bat, rua rau duoc cap du, dat chat luong'
+      ]}
+    ]}
+  ],
+  MT: [
+    {id:'mt1', name:'Quan ly chat thai ran', icon:'♻️', groups:[
+      {g:'Phan loai tai nguon', items:[
+        'Rac thai duoc phan loai: rac sinh hoat, rac xay dung, chat thai nguy hai',
+        'Thung rac co nap day, co nhan dan ro rang tung loai',
+        'Cong nhan duoc huan luyen phan loai rac tai nguon'
+      ]},
+      {g:'Luu giu & Van chuyen', items:[
+        'Rac xay dung tap ket dung khu vuc quy dinh',
+        'Chat thai nguy hai duoc luu giu dung thung chuyen dung co nhan mac',
+        'Khu vuc luu giu chat thai co mai che, nen chong tham',
+        'Co hop dong voi don vi xu ly chat thai hop phap'
+      ]},
+      {g:'Thu gom & Xu ly', items:[
+        'Khong dot rac tai cong truong',
+        'Rac thai duoc thu gom va xu ly dinh ky, khong de tich dong'
+      ]}
+    ]},
+    {id:'mt2', name:'Quan ly nuoc thai & khi thai', icon:'💧', groups:[
+      {g:'Nuoc thai', items:[
+        'Nuoc thai sinh hoat duoc xu ly qua be tu hoai truoc khi xa',
+        'Nuoc thai thi cong khong xa truc tiep ra moi truong',
+        'He thong thoat nuoc mat bang cong truong hoat dong tot',
+        'Khong de dau nhot, hoa chat tran ra dat va he thong nuoc'
+      ]},
+      {g:'Khi thai & Bui', items:[
+        'May moc, xe may duoc kiem tra tinh trang khi thai',
+        'Khong de may moc no may tai cho ma khong can thiet',
+        'Khu vuc han cat co bien phap kiem soat khi doc va tia cuc tim',
+        'Bui tren cong truong duoc kiem soat: xe phun nuoc, che phu vat lieu'
+      ]},
+      {g:'Tieng on', items:[
+        'Cam su dung may gay on > 85dB gan khu dan cu sau 22h',
+        'Bao cao su co moi truong ngay lap tuc khi phat hien'
+      ]}
+    ]},
+    {id:'mt3', name:'Bao ve dat & Phong chong o nhiem', icon:'🌱', groups:[
+      {g:'Phong chong tran do', items:[
+        'Co bien phap phong chong tran do, ro ri hoa chat / dau',
+        'Bo kit xu ly su co tran do (Spill Kit) co san tai khu vuc co rui ro',
+        'Khong de xe may, may moc ro ri dau tren nen dat, san'
+      ]},
+      {g:'Bao quan & Su dung hoa chat', items:[
+        'Hoa chat duoc bao quan dung kho chuyen dung, co nhan mac',
+        'Khong su dung hoa chat cam theo quy dinh moi truong',
+        'Ho so bao quan va su dung hoa chat duoc cap nhat'
+      ]},
+      {g:'Bao ve mat bang xanh', items:[
+        'Dat dao len duoc bao phu, tranh bui va xoi mon do mua',
+        'Cay xanh, mat bang xanh duoc bao ve trong qua trinh thi cong',
+        'Ve sinh mat bang sau moi ca lam viec'
+      ]}
     ]}
   ]
-};
-
-// ─── STATE ───────────────────────────────────────────────────────────────────
+};// ─── STATE ───────────────────────────────────────────────────────────────────
 const DB_KEY = 'mep_v3';
 function loadDB(){
   try{ return JSON.parse(localStorage.getItem(DB_KEY)); }catch(e){return null;}
 }
 function saveDB(db){ localStorage.setItem(DB_KEY, JSON.stringify(db)); }
 
-let DB = loadDB() || { cats: JSON.parse(JSON.stringify(DEFAULT_CATS)), inspections: [] };
-// ensure all 4 systems exist
-['ELE','HVAC','PCCC','PS'].forEach(s=>{ if(!DB.cats[s]) DB.cats[s] = JSON.parse(JSON.stringify(DEFAULT_CATS[s])); });
+var _sv=loadDB();
+var DB={cats:JSON.parse(JSON.stringify(DEFAULT_CATS)),inspections:_sv?(_sv.inspections||[]):[]};
 saveDB(DB);
 
 let NAV = { stack:[], sys:null, catId:null, inspId:null, adminSys:null, adminCatId:null };
 
 // ─── NAVIGATION ──────────────────────────────────────────────────────────────
 const SYS_INFO = {
-  ELE: {name:'An toàn thi công', icon:'⛑️', color:'#185FA5'},
-  HVAC:{name:'Thiết bị có yêu cầu nghiêm ngặt', icon:'⚙️', color:'#0F6E56'},
-  PCCC:{name:'An toàn điện trong thi công', icon:'⚡', color:'#A32D2D'},
-  PS:  {name:'An toàn thực phẩm', icon:'🥗', color:'#854F0B'}
+  ATTC: {name:'An toan thi cong', icon:'⛑️', color:'#185FA5'},
+  ATNN: {name:'An toan thiet bi nghiem ngat', icon:'⚙️', color:'#854F0B'},
+  ATDIEN:{name:'An toan thi cong dien', icon:'⚡', color:'#A32D2D'},
+  ATTP: {name:'An toan thuc pham', icon:'🍽️', color:'#0F6E56'},
+  MT:   {name:'Moi truong', icon:'🌿', color:'#27500A'}
 };
 
 function showPage(id, title, sub, actions){
@@ -572,7 +848,7 @@ function renderHome(){
   document.getElementById('h-total').textContent = all.length;
   document.getElementById('h-done').textContent = all.filter(i=>i.done).length;
   document.getElementById('h-fail').textContent = all.filter(i=>i.hasFail).length;
-  ['ELE','HVAC','PCCC','PS'].forEach(s=>{
+  ['ATTC','ATNN','ATDIEN','ATTP','MT'].forEach(s=>{
     const n = all.filter(i=>i.sys===s).length;
     const cats = DB.cats[s]||[];
     document.getElementById('sc-'+s).textContent = cats.length+' hạng mục · '+n+' phiếu đã kiểm tra';
@@ -594,7 +870,7 @@ function renderCats(){
       <span style="font-size:22px">${cat.icon||'📋'}</span>
       <div style="flex:1">
         <div class="cat-name">${cat.name}</div>
-        <div class="cat-count">${cat.items.length} mục kiểm tra</div>
+        <div class="cat-count">${cat.groups?cat.groups.reduce(function(s,g){return s+g.items.length;},0):(cat.items||[]).length} muc</div>
       </div>
       <span style="color:var(--tx3);font-size:20px">›</span>
     </button>
@@ -636,7 +912,8 @@ function openForm(catId){
   const cat = (DB.cats[NAV.sys]||[]).find(c=>c.id===catId);
   document.getElementById('fcp-icon').textContent = cat.icon||'📋';
   document.getElementById('fcp-name').textContent = cat.name;
-  document.getElementById('fcp-count').textContent = cat.items.length+' mục kiểm tra';
+  var _cnt = cat.groups ? cat.groups.reduce(function(s,g){return s+g.items.length;},0) : (cat.items||[]).length;
+  document.getElementById('fcp-count').textContent = _cnt+' muc kiem tra';
   document.getElementById('f-project').value='';
   document.getElementById('f-area').value='';
   document.getElementById('f-location').value='';
@@ -659,7 +936,12 @@ function startChecklist(){
     engineer:eng,
     date:document.getElementById('f-date').value,
     done:false, hasFail:false,
-    items: cat.items.map((q,i)=>({id:i,q,st:null,note:''})),
+    items: (function(){
+      var flat=[], idx=0;
+      if(cat.groups){ cat.groups.forEach(function(g){ g.items.forEach(function(q){ flat.push({id:idx++,q:q,g:g.g,st:null,note:'',photos:[]}); }); }); }
+      else { (cat.items||[]).forEach(function(q){ flat.push({id:idx++,q:q,g:null,st:null,note:'',photos:[]}); }); }
+      return flat;
+    })(),
     createdAt:new Date().toISOString()
   };
   DB.inspections.push(insp); saveDB(DB);
@@ -670,20 +952,106 @@ function startChecklist(){
 // ─── CHECKLIST ───────────────────────────────────────────────────────────────
 function renderCL(insp){
   var clTitle=insp.isRecheck?'[Recheck] '+insp.catName:insp.catName;
-  showPage('cl', clTitle, insp.project+' · '+insp.area);
-  document.getElementById('cl-items').innerHTML = insp.items.map((it,idx)=>`
-    <div class="ci${it.st?' s-'+it.st:''}" id="ci${idx}">
-      <div class="ci-hdr"><span class="ci-num">${idx+1}.</span><span class="ci-txt">${it.q}</span></div>
-      <div class="ci-acts">
-        <button class="act-btn${it.st==='pass'?' sp':''}" onclick="setSt(${idx},'pass')">✓ Pass</button>
-        <button class="act-btn${it.st==='fail'?' sf':''}" onclick="setSt(${idx},'fail')">✗ Fail</button>
-        <button class="act-btn${it.st==='na'?' sn':''}" onclick="setSt(${idx},'na')">N/A</button>
-      </div>
-      <textarea placeholder="Ghi chú..." onchange="setNote(${idx},this.value)">${it.note||''}</textarea>
-    </div>
-  `).join('');
+  showPage('cl', clTitle, insp.project+' - '+insp.area);
   updateCLStats(insp);
+  var groups=[], grpMap={};
+  for(var i=0;i<insp.items.length;i++){
+    var it=insp.items[i];
+    var gn=it.g||'Muc kiem tra';
+    if(!grpMap[gn]){grpMap[gn]={name:gn,idxs:[]};groups.push(grpMap[gn]);}
+    grpMap[gn].idxs.push(i);
+  }
+  var html='';
+  for(var gi=0;gi<groups.length;gi++){
+    var grp=groups[gi];
+    var gPass=0;
+    for(var k=0;k<grp.idxs.length;k++){if(insp.items[grp.idxs[k]].st==='pass')gPass++;}
+    var allPass=(gPass===grp.idxs.length&&grp.idxs.length>0);
+    var hdrColor=allPass?'var(--greenmid)':'#185FA5';
+    html+='<div class="grp-wrap">';
+    html+='<div class="grp-header" onclick="toggleGrp('+gi+')" style="background:'+hdrColor+'">';
+    html+='<span class="grp-arrow" id="garr'+gi+'">&#9660;</span>';
+    html+='<span class="grp-name">'+grp.name+'</span>';
+    html+='<span class="grp-stats">'+gPass+'/'+grp.idxs.length+'</span>';
+    html+='</div>';
+    html+='<div class="grp-body" id="gbody'+gi+'">';
+    for(var k2=0;k2<grp.idxs.length;k2++){
+      var di=grp.idxs[k2];
+      var it2=insp.items[di];
+      var ciCls=it2.st?' s-'+it2.st:'';
+      var spCls=it2.st==='pass'?' sp':'';
+      var sfCls=it2.st==='fail'?' sf':'';
+      var snCls=it2.st==='na'?' sn':'';
+      html+='<div class="ci'+ciCls+'" id="ci'+di+'" draggable="true" data-idx="'+di+'"';
+      html+=' ondragstart="onDS(event)" ondragover="onDO(event)" ondrop="onDP(event)" ondragend="onDE(event)">';
+      html+='<div class="ci-hdr"><span class="drag-handle">&#8942;&#8942;</span><span class="ci-txt">'+it2.q+'</span></div>';
+      html+='<div class="ci-acts">';
+      html+='<button class="act-btn'+spCls+'" data-di="'+di+'" data-st="pass" onclick="setStBtn(this)">&#10003; Pass</button>';
+      html+='<button class="act-btn'+sfCls+'" data-di="'+di+'" data-st="fail" onclick="setStBtn(this)">&#10007; Fail</button>';
+      html+='<button class="act-btn'+snCls+'" data-di="'+di+'" data-st="na" onclick="setStBtn(this)">N/A</button>';
+      html+='<button class="act-btn" onclick="triggerPhoto('+di+')" style="padding:5px 10px">&#128247;</button>';
+      html+='</div>';
+      html+='<input type="file" id="fi'+di+'" accept="image/*" capture="environment" style="display:none" onchange="onPhoto(event,'+di+')">';
+      html+='<textarea placeholder="Ghi chu..." data-di="'+di+'" onchange="setNoteBtn(this)" style="min-height:48px">'+(it2.note||'')+'</textarea>';
+      html+='<div class="photo-row" id="pr'+di+'"></div>';
+      html+='</div>';
+    }
+    html+='</div></div>';
+  }
+  document.getElementById('cl-items').innerHTML=html;
+  for(var i2=0;i2<insp.items.length;i2++){
+    if(insp.items[i2].photos&&insp.items[i2].photos.length) renderPhotos(i2,insp);
+  }
 }
+function setStBtn(btn){
+  var di=parseInt(btn.dataset.di);
+  var st=btn.dataset.st;
+  setSt(di, st);
+}
+function setNoteBtn(ta){
+  var di=parseInt(ta.dataset.di);
+  setNote(di, ta.value);
+}
+function toggleGrp(gi){
+  var b=document.getElementById('gbody'+gi);
+  var a=document.getElementById('garr'+gi);
+  if(b.classList.contains('hidden')){b.classList.remove('hidden');a.classList.remove('collapsed');}
+  else{b.classList.add('hidden');a.classList.add('collapsed');}
+}
+var _dSrc=null;
+function onDS(e){_dSrc=parseInt(e.currentTarget.dataset.idx);e.dataTransfer.effectAllowed='move';}
+function onDO(e){e.preventDefault();}
+function onDE(e){}
+function onDP(e){
+  e.preventDefault();
+  var tgt=parseInt(e.currentTarget.dataset.idx);
+  if(_dSrc===null||_dSrc===tgt){_dSrc=null;return;}
+  var insp=DB.inspections.find(function(i){return i.id===NAV.inspId;});
+  var tmp=insp.items[_dSrc];insp.items[_dSrc]=insp.items[tgt];insp.items[tgt]=tmp;
+  insp.items[_dSrc].id=_dSrc;insp.items[tgt].id=tgt;
+  saveDB(DB);_dSrc=null;renderCL(insp);
+}
+
+function toggleGrp(gi){
+  var b=document.getElementById('gbody'+gi);
+  var a=document.getElementById('garr'+gi);
+  if(b.classList.contains('hidden')){b.classList.remove('hidden');a.classList.remove('collapsed');}
+  else{b.classList.add('hidden');a.classList.add('collapsed');}
+}
+var _dSrc=null;
+function onDS(e){_dSrc=parseInt(e.currentTarget.dataset.idx);e.dataTransfer.effectAllowed='move';}
+function onDO(e){e.preventDefault();}
+function onDE(e){}
+function onDP(e){
+  e.preventDefault();
+  var tgt=parseInt(e.currentTarget.dataset.idx);
+  if(_dSrc===null||_dSrc===tgt){_dSrc=null;return;}
+  var insp=DB.inspections.find(function(i){return i.id===NAV.inspId;});
+  var tmp=insp.items[_dSrc];insp.items[_dSrc]=insp.items[tgt];insp.items[tgt]=tmp;
+  insp.items[_dSrc].id=_dSrc;insp.items[tgt].id=tgt;
+  saveDB(DB);_dSrc=null;renderCL(insp);
+}
+
 function setSt(idx,st){
   const insp=DB.inspections.find(i=>i.id===NAV.inspId);
   insp.items[idx].st=st; saveDB(DB);
@@ -1071,7 +1439,7 @@ renderHome();
 
 <script>
 // Xóa cache khi update version
-var APP_VERSION = '2.2';
+var APP_VERSION = '4.1';
 if(localStorage.getItem('mep_version') !== APP_VERSION){
   localStorage.clear();
   localStorage.setItem('mep_version', APP_VERSION);
