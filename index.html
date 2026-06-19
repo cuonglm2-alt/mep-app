@@ -153,6 +153,11 @@ input:focus,select:focus{outline:none;border-color:var(--blue)}
 .lb{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:400;align-items:center;justify-content:center;flex-direction:column}
 .lb.on{display:flex}
 .lb-close{position:absolute;top:14px;right:14px;background:rgba(255,255,255,.2);color:#fff;border:none;border-radius:50%;width:38px;height:38px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+
+.settings-bar{background:var(--greenbg);border:1px solid var(--greenmid);border-radius:var(--rs);padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:2px}
+.settings-bar .lbl{font-size:12px;color:var(--green);font-weight:600;flex-shrink:0}
+.settings-bar .val{font-size:13px;color:var(--tx);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.settings-bar .edit-btn{background:none;border:1px solid var(--greenmid);border-radius:6px;padding:4px 10px;font-size:12px;color:var(--green);cursor:pointer;flex-shrink:0;font-family:inherit;font-weight:600}
 </style>
 </head>
 <body>
@@ -241,6 +246,7 @@ input:focus,select:focus{outline:none;border-color:var(--blue)}
 
 <!-- ===== FORM INFO ===== -->
 <div class="page" id="page-form">
+  <div id="saved-info-bar" style="display:none"></div>
   <div class="sec-label" id="form-cat-label">Thông tin kiểm tra</div>
   <div class="card" id="form-cat-preview" style="display:flex;align-items:center;gap:10px;padding:11px 14px">
     <span style="font-size:20px" id="fcp-icon">📋</span>
@@ -924,11 +930,15 @@ function openForm(catId){
   document.getElementById('fcp-name').textContent = cat.name;
   var _cnt = cat.groups ? cat.groups.reduce(function(s,g){return s+g.items.length;},0) : (cat.items||[]).length;
   document.getElementById('fcp-count').textContent = _cnt+' muc kiem tra';
-  document.getElementById('f-project').value='';
-  document.getElementById('f-area').value='';
-  document.getElementById('f-location').value='';
-  document.getElementById('f-engineer').value='';
+  // Tự điền thông tin đã lưu
+  var saved = getSavedInfo();
+  document.getElementById('f-project').value = saved.project || '';
+  document.getElementById('f-area').value = saved.area || '';
+  document.getElementById('f-location').value = saved.location || '';
+  document.getElementById('f-engineer').value = saved.engineer || '';
   document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
+  // Hiện banner thông tin đã lưu nếu có
+  renderSavedInfoBar(saved);
   showPage('form', cat.name, SYS_INFO[NAV.sys].name+' — Nhập thông tin');
 }
 function startChecklist(){
@@ -936,6 +946,13 @@ function startChecklist(){
   const eng = document.getElementById('f-engineer').value.trim();
   if(!proj){toast('Vui lòng nhập tên dự án');return}
   if(!eng){toast('Vui lòng nhập tên người kiểm tra');return}
+  // Lưu lại thông tin để dùng cho phiếu sau
+  saveInfo({
+    project: proj,
+    area: document.getElementById('f-area').value.trim(),
+    location: document.getElementById('f-location').value.trim(),
+    engineer: eng
+  });
   const cat = (DB.cats[NAV.sys]||[]).find(c=>c.id===NAV.catId);
   const id = 'i'+Date.now();
   const insp = {
@@ -957,6 +974,46 @@ function startChecklist(){
   DB.inspections.push(insp); saveDB(DB);
   NAV.inspId=id; NAV.stack.push('form');
   renderCL(insp);
+}
+
+
+// ─── LƯU THÔNG TIN MẶC ĐỊNH ──────────────────────────────────────────────────
+var INFO_KEY = 'mep_saved_info';
+function getSavedInfo(){
+  try { return JSON.parse(localStorage.getItem(INFO_KEY)) || {}; }
+  catch(e){ return {}; }
+}
+function saveInfo(obj){
+  var cur = getSavedInfo();
+  var merged = {
+    project:  obj.project  || cur.project  || '',
+    area:     obj.area     || cur.area     || '',
+    location: obj.location || cur.location || '',
+    engineer: obj.engineer || cur.engineer || ''
+  };
+  localStorage.setItem(INFO_KEY, JSON.stringify(merged));
+}
+function renderSavedInfoBar(saved){
+  var bar = document.getElementById('saved-info-bar');
+  if(!bar) return;
+  if(!saved.project && !saved.engineer){ bar.style.display='none'; return; }
+  bar.style.display = 'block';
+  bar.innerHTML =
+    '<div class="settings-bar">' +
+    '<span class="lbl">✓ Đã lưu</span>' +
+    '<span class="val">' + (saved.project||'') + (saved.engineer?' · '+saved.engineer:'') + '</span>' +
+    '<button class="edit-btn" onclick="clearSavedInfo()">Xóa</button>' +
+    '</div>';
+}
+function clearSavedInfo(){
+  localStorage.removeItem(INFO_KEY);
+  var bar = document.getElementById('saved-info-bar');
+  if(bar) bar.style.display='none';
+  document.getElementById('f-project').value='';
+  document.getElementById('f-area').value='';
+  document.getElementById('f-location').value='';
+  document.getElementById('f-engineer').value='';
+  toast('Đã xóa thông tin đã lưu');
 }
 
 // ─── CHECKLIST ───────────────────────────────────────────────────────────────
@@ -1532,7 +1589,7 @@ renderHome();
 
 <script>
 // ─── VERSION & AUTO-UPDATE ───────────────────────────────────────────────────
-var APP_VERSION = '4.3';
+var APP_VERSION = '4.4';
 
 // Xóa localStorage cũ khi đổi version cấu trúc
 if(localStorage.getItem('mep_version') !== APP_VERSION){
